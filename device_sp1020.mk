@@ -38,7 +38,8 @@ $(call inherit-product, device/common/gps/gps_us_supl.mk)
 PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/init.rc:root/init.rc \
     device/softwinner/sp1020/init.sp1020.rc:root/init.sp1020.rc \
-    device/softwinner/sp1020/init.sp1020.usb.rc:root/init.sp1020.usb.rc
+    device/softwinner/sp1020/init.sp1020.usb.rc:root/init.sp1020.usb.rc \
+    device/softwinner/sp1020/prebuilt/modules/nand.ko:root/nand.ko
 
 # Modules for recovery
 PRODUCT_COPY_FILES += \
@@ -47,6 +48,16 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/modules/lcd.ko:recovery/root/lcd.ko \
     device/softwinner/sp1020/prebuilt/modules/nand.ko:recovery/root/nand.ko \
     device/softwinner/sp1020/prebuilt/modules/gslX680.ko:recovery/root/gslX680.ko
+
+# Modules for /system/vendor/modules
+PRODUCT_COPY_FILES += \
+    device/softwinner/sp1020/prebuilt/modules/disp.ko:system/vendor/modules/disp.ko \
+    device/softwinner/sp1020/prebuilt/modules/hdmi.ko:system/vendor/modules/hdmi.ko \
+    device/softwinner/sp1020/prebuilt/modules/lcd.ko:system/vendor/modules/lcd.ko \
+    device/softwinner/sp1020/prebuilt/modules/nand.ko:system/vendor/modules/nand.ko \
+    device/softwinner/sp1020/prebuilt/modules/gslX680.ko:system/vendor/modules/ump.ko \
+    device/softwinner/sp1020/prebuilt/modules/ump.ko:system/vendor/modules/ump.ko \
+    device/softwinner/sp1020/prebuilt/modules/mali.ko:system/vendor/modules/mali.ko
 
 # twrp.fstab
 PRODUCT_COPY_FILES += \
