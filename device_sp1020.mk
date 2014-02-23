@@ -58,9 +58,24 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/modules/hdmi.ko:system/vendor/modules/hdmi.ko \
     device/softwinner/sp1020/prebuilt/modules/lcd.ko:system/vendor/modules/lcd.ko \
     device/softwinner/sp1020/prebuilt/modules/nand.ko:system/vendor/modules/nand.ko \
-    device/softwinner/sp1020/prebuilt/modules/gslX680.ko:system/vendor/modules/ump.ko \
+    device/softwinner/sp1020/prebuilt/modules/gslX680.ko:system/vendor/modules/gslX680.ko \
     device/softwinner/sp1020/prebuilt/modules/ump.ko:system/vendor/modules/ump.ko \
-    device/softwinner/sp1020/prebuilt/modules/mali.ko:system/vendor/modules/mali.ko
+    device/softwinner/sp1020/prebuilt/modules/mali.ko:system/vendor/modules/mali.ko \
+    device/softwinner/sp1020/prebuilt/modules/sw_device.ko:system/vendor/modules/sw_device.ko \
+    device/softwinner/sp1020/prebuilt/modules/gc0329.ko:system/vendor/modules/gc0329.ko \
+    device/softwinner/sp1020/prebuilt/modules/gc03291.ko:system/vendor/modules/gc03291.ko \
+    device/softwinner/sp1020/prebuilt/modules/sunxi_csi0.ko:system/vendor/modules/sunxi_csi0.ko \
+    device/softwinner/sp1020/prebuilt/modules/sunxi_csi1.ko:system/vendor/modules/sunxi_csi1.ko \
+    device/softwinner/sp1020/prebuilt/modules/usbnet.ko:system/vendor/modules/usbnet.ko \
+    device/softwinner/sp1020/prebuilt/modules/asix.ko:system/vendor/modules/asix.ko \
+    device/softwinner/sp1020/prebuilt/modules/qf9700.ko:system/vendor/modules/qf9700.ko \
+    device/softwinner/sp1020/prebuilt/modules/mcs7830.ko:system/vendor/modules/mcs7830.ko \
+    device/softwinner/sp1020/prebuilt/modules/rtl8150.ko:system/vendor/modules/rtl8150.ko \
+    device/softwinner/sp1020/prebuilt/modules/cdc_ether.ko:system/vendor/modules/cdc_ether.ko \
+    device/softwinner/sp1020/prebuilt/modules/usbnet.ko:system/vendor/modules/usbnet.ko
+
+#    device/softwinner/sp1020/prebuilt/modules/camera_led_con.ko:system/vendor/modules/camera_led_con.ko \
+#    device/softwinner/sp1020/prebuilt/modules/cedarx.ko:system/vendor/modules/cedarx.ko \
 
 # twrp.fstab
 PRODUCT_COPY_FILES += \
