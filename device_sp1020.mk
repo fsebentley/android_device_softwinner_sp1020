@@ -39,6 +39,8 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/init.rc:root/init.rc \
     device/softwinner/sp1020/init.sp1020.rc:root/init.sp1020.rc \
     device/softwinner/sp1020/init.sp1020.usb.rc:root/init.sp1020.usb.rc \
+    device/softwinner/sp1020/recovery/init_parttion.sh:root/sbin/init_parttion.sh \
+    device/softwinner/sp1020/prebuilt/bin/busybox:root/sbin/busybox \
     device/softwinner/sp1020/prebuilt/modules/nand.ko:root/nand.ko
 
 # Modules for recovery
