@@ -1,3 +1,18 @@
 #
 # system.prop for sp1020
 #
+
+wifi.interface=wlan0
+ro.carrier=wifi-only
+
+ro.opengles.version=131072
+
+ro.sf.lcd_density=140
+
+service.adb.root=1
+ro.adb.secure=0
+ro.secure=0
+
+#taktiK
+
+#ro.zygote.disable_gl_preload=true
