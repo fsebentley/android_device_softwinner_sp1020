@@ -95,6 +95,10 @@ PRODUCT_TAGS += dalvik.gc.type-precise
 # Opengles version
 PRODUCT_PROPERTY_OVERRIDES += ro.opengles.version=131072
 
+# Lcd Density
+PRODUCT_PROPERTY_OVERRIDES += ro.sf.lcd_density=140
+
+
 # Include Proprietary files if they exist
 $(call inherit-product-if-exists, vendor/softwinner/sp1020/sp1020-vendor.mk)
 
