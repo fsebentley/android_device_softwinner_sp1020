@@ -2,7 +2,7 @@
 #define __HWCOMPOSER_PRIV_H__
 
 #include <hardware/hardware.h>
-#include <hardware/hwcomposer.h>
+#include <hwcomposer.h>
 #include "gralloc_priv.h"
 #include <drv_display.h>
 #include <fb.h>

@@ -29,7 +29,7 @@
 
 #include <hardware/hardware.h>
 #include <system/audio.h>
-#include <hardware/audio.h>
+#include "audio.h"
 
 #include <tinyalsa/asoundlib.h>
 #include <audio_utils/resampler.h>
@@ -2380,10 +2380,10 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
 
     in->requested_rate 	= config->sample_rate;
 
+
     // default config
     memcpy(&in->config, &pcm_config_mm_in, sizeof(pcm_config_mm_in));
     in->config.channels = channel_count;
-	in->config.in_init_channels = channel_count;
 
 	ALOGV("to malloc in-buffer: period_size: %d, frame_size: %d",
 		in->config.period_size, audio_stream_frame_size(&in->stream.common));
@@ -2391,22 +2391,11 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
                         audio_stream_frame_size(&in->stream.common) * 8);
 
     if (!in->buffer) {
-        ret = -ENOMEM;
-        goto err;
+    return -ENOMEM;
     }
 
 	ladev->af_capture_flag = false;
 	//devices = AUDIO_DEVICE_IN_WIFI_DISPLAY;//for test
-
-	if (devices == AUDIO_DEVICE_IN_AF) {
-		ALOGV("to malloc PcmManagerBuffer: Buffer_size: %d", AF_BUFFER_SIZE);
-    	ladev->PcmManager.BufStart= (unsigned char *)malloc(AF_BUFFER_SIZE);
-
-		if(!ladev->PcmManager.BufStart) {
-			ret = -ENOMEM;
-			goto err;
-   		}
-
 		ladev->PcmManager.BufExist 		= true;
 		ladev->PcmManager.BufTotalLen 	= AF_BUFFER_SIZE;
 		ladev->PcmManager.BufWritPtr 	= ladev->PcmManager.BufStart;
@@ -2493,7 +2482,6 @@ static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
             AUDIO_DEVICE_IN_WIRED_HEADSET |
             AUDIO_DEVICE_IN_AUX_DIGITAL |
             AUDIO_DEVICE_IN_BACK_MIC |
-			AUDIO_DEVICE_IN_AF |
             AUDIO_DEVICE_IN_ALL_SCO |
             AUDIO_DEVICE_IN_DEFAULT);
 }

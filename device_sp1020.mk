@@ -129,6 +129,7 @@ PRODUCT_COPY_FILES += \
 # ETC
 PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml \
+    device/softwinner/sp1020/prebuilt/etc/media_profiles.xml:system/etc/media_profiles.xml \
     device/softwinner/sp1020/prebuilt/etc/sensors.sh:/system/bin/sensors.sh
 
 # GPS
@@ -138,6 +139,13 @@ BOARD_USES_GPS_TYPE := simulator
 # Audio
 PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/hardware/audio/audio_policy.conf:system/etc/audio_policy.conf
+
+#audio
+PRODUCT_PACKAGES += \
+    audio.a2dp.default \
+    audio.usb.default  \
+    audio.r_submix.default \
+    libaudioutils
 
 # PACKAGES
 #PRODUCT_PACKAGES += \
@@ -159,9 +167,9 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/lib/libion_alloc.so:system/lib/libion_alloc.so \
     device/softwinner/sp1020/prebuilt/lib/hw/sensors.exDroid.so:system/lib/hw/sensors.exDroid.so \
     device/softwinner/sp1020/prebuilt/lib/hw/gps.exDroid.so:system/lib/hw/gps.exDroid.so \
-    device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so
-
-#    device/softwinner/sp1020/prebuilt/lib/hw/display.sun7i.so:system/lib/hw/display.sun7i.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/audio.primary.exDroid.so:system/lib/hw/audio.primary.exDroid.so \
+    device/softwinner/sp1020/prebuilt/lib/libtinyalsa.so:system/lib/libtinyalsa.so
 
 # WiFi Overrides
 PRODUCT_PROPERTY_OVERRIDES := \
