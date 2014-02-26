@@ -163,8 +163,7 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/lib/hw/display.sun7i.so:system/lib/hw/display.sun7i.so \
     device/softwinner/sp1020/prebuilt/lib/hw/sensors.exDroid.so:system/lib/hw/sensors.exDroid.so \
     device/softwinner/sp1020/prebuilt/lib/hw/gps.exDroid.so:system/lib/hw/gps.exDroid.so \
-    device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so \
-    device/softwinner/sp1020/prebuilt/lib/hw/camera.exDroid.so:system/lib/hw/camera.exDroid.so
+    device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so
 
 # Set custom values for dalvik
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
