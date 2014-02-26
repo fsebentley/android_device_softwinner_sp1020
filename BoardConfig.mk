@@ -58,6 +58,7 @@ TARGET_PREBUILT_KERNEL := device/softwinner/sp1020/kernel
 # Video
 USE_OPENGL_RENDERER := true
 BOARD_EGL_CFG := device/softwinner/sp1020/prebuilt/lib/egl/egl.cfg
+COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
 
 # Wireless
 BOARD_WIFI_VENDOR := realtek

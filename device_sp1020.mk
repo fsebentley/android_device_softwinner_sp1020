@@ -42,7 +42,9 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/recovery/init_parttion.sh:root/sbin/init_parttion.sh \
     device/softwinner/sp1020/prebuilt/bin/busybox:root/sbin/busybox \
     device/softwinner/sp1020/prebuilt/modules/nand.ko:root/nand.ko \
-    device/softwinner/sp1020/fstab.sp1020:root/fstab.sp1020
+    device/softwinner/sp1020/fstab.sp1020:root/fstab.sp1020 \
+    device/softwinner/sp1020/recovery/ueventd.sun7i.rc:root/ueventd.sun7i.rc \
+    device/softwinner/sp1020/prebuilt/bin/setrecovery:root/sbin/setrecovery
 
 # Modules for recovery
 PRODUCT_COPY_FILES += \
@@ -84,7 +86,8 @@ PRODUCT_COPY_FILES += \
 # More Recovery Files
 PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/recovery/init_parttion.sh:recovery/root/sbin/init_parttion.sh \
-    device/softwinner/sp1020/recovery/ueventd.sun7i.rc:recovery/root/ueventd.sun7i.rc
+    device/softwinner/sp1020/recovery/ueventd.sun7i.rc:recovery/root/ueventd.sun7i.rc \
+    device/softwinner/sp1020/prebuilt/bin/busybox:recovery/root/sbin/busybox
 
 # We should have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
@@ -99,10 +102,6 @@ $(call inherit-product-if-exists, vendor/softwinner/sp1020/sp1020-vendor.mk)
 PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/usr/sw-keyboard.kl:system/usr/keylayout/sw-keyboard.kl \
     device/softwinner/sp1020/prebuilt/usr/tp.idc:system/usr/idc/tp.idc
-
-# Set default USB interface
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    persist.sys.usb.config=mtp,adb
 
 # Permissions
 PRODUCT_COPY_FILES += \
@@ -144,15 +143,24 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/hardware/audio/audio_policy.conf:system/etc/audio_policy.conf
 
 # PACKAGES
-PRODUCT_PACKAGES += \
-    libion \
-    hwcomposer.exDroid \
-    display.exdroid \
-    sensors.exDroid \
-    lights.sun7i \
-    display.sun7i
+#PRODUCT_PACKAGES += \
+#    libion \
+#    hwcomposer.exDroid \
+#    display.exdroid \
+#    sensors.exDroid \
+#    lights.sun7i \
+#    display.sun7i \
+##    camera.exDroid
 
-    #camera.exDroid \
+#USE PREBUILTS INSTEAD
+PRODUCT_COPY_FILES += \
+    device/softwinner/sp1020/prebuilt/lib/libion.so:system/lib/libion.so \
+    device/softwinner/sp1020/prebuilt/lib/libion_alloc.so:system/lib/libion_alloc.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/display.sun7i.so:system/lib/hw/display.sun7i.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/sensors.exDroid.so:system/lib/hw/sensors.exDroid.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/gps.exDroid.so:system/lib/hw/gps.exDroid.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so \
+    device/softwinner/sp1020/prebuilt/lib/hw/camera.exDroid.so:system/lib/hw/camera.exDroid.so
 
 # Set custom values for dalvik
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
