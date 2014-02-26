@@ -159,7 +159,7 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so
 
 # Set custom values for dalvik
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.heapsize=384m \
     dalvik.vm.heapstartsize=8m \
     dalvik.vm.heapgrowthlimit=96m \
@@ -174,6 +174,10 @@ PRODUCT_PROPERTY_OVERRIDES := \
     wifi.supplicant_scan_interval=15 \
     keyguard.no_require_sim=true
 
+PRODUCT_PROPERTY_DEFAULT_OVERRIDES += \
+    ro.adb.secure=0 \
+    ro.secure=0
+
 # DRM
 PRODUCT_PROPERTY_OVERRIDES += drm.service.enabled=true
 
@@ -185,14 +189,6 @@ PRODUCT_PACKAGES += \
     libWVStreamControlAPI_L3 \
     libwvdrm_L3 \
     libdrmdecrypt
-
-# Strictmode
-PRODUCT_PROPERTY_OVERRIDES := \
-    persist.sys.strictmode.visual=0 \
-    persist.sys.strictmode.disable=1
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.kernel.android.checkjni=0
 
 # Sounds
 $(call inherit-product, frameworks/base/data/sounds/AudioPackage10.mk)
