@@ -18,21 +18,7 @@
 
 #include "hwc.h"
 
-#define   DISPLAY_CMD_SETDISPPARA       0
-#define   DISPLAY_CMD_CHANGEDISPMODE    1
-#define   DISPLAY_CMD_OPENDISP          2
-#define   DISPLAY_CMD_CLOSEDISP         3
-#define   DISPLAY_CMD_GETHDMISTATUS     4
-#define   DISPLAY_CMD_GETTVSTATUS       5
-#define   DISPLAY_CMD_GETDISPPARA       6
-#define   DISPLAY_CMD_SETMASTERDISP     7
-#define   DISPLAY_CMD_GETMASTERDISP     8
-#define   DISPLAY_CMD_GETMAXWIDTHDISP   9
-#define   DISPLAY_CMD_GETMAXHDMIMODE    10
-#define   DISPLAY_CMD_GETDISPLAYMODE    11
-#define   DISPLAY_CMD_GETDISPCOUNT      12
-#define   DISPLAY_CMD_SETDISPMODE       13
-#define   DISPLAY_CMD_SETBACKLIGHTMODE  14
+
 
 /*****************************************************************************/
 
@@ -75,15 +61,13 @@ static int hwc_blank(struct hwc_composer_device_1* dev, int disp, int blank)
     return 0;
 }
 
+#if 0
 static int hwc_setParameter(struct hwc_composer_device_1* dev, int cmd, int disp,
             int para0, int para1)
 {
 	int ret = 0;
 	 switch(cmd)
 	{
-		case DISPLAY_CMD_SET3DMODE:
-			ret = _hwc_device_set_3d_mode(disp, (__display_3d_mode)para0);
-			break;
 		case DISPLAY_CMD_SETBACKLIGHTMODE:
 			ret = _hwc_device_set_backlight_mode(disp, para0);
 			break;
@@ -107,7 +91,7 @@ static int hwc_setParameter(struct hwc_composer_device_1* dev, int cmd, int disp
 
 	return ret;
 }
-
+#endif
 
 static int hwc_getParameter(struct hwc_composer_device_1* dev, int cmd, int disp,
             int para0, int para1)
@@ -203,45 +187,42 @@ int hwc_prepare(hwc_composer_device_1_t *dev, size_t numDisplays,
             break;
         }
 
-        memcpy(&ctx->frame[disp], &psDisplay->frame, sizeof(hwc_rect_t));
-
         if(disp == 1)
         {
             if(!ctx->hdmi_hpd)
             {
-                continue;
-            }
-            if(ctx->frame[disp].right <= 0 || ctx->frame[disp].bottom <= 0)
-            {
+            	ALOGD("ctx->hdmi_hpd is NULL");
                 continue;
             }
         }
 
     	if(psDisplay->numHwLayers < 2)
     	{
-    		ALOGV("%s: display[%d] numHwLayer:%d less then 2",
+    		ALOGD("%s: display[%d] numHwLayer:%d less then 2",
     								__func__, disp, psDisplay->numHwLayers);
 
             ctx->show_black[disp] = 1;
             forceSoftwareRendering = 1;
     	}
+		else
+		{
+			for(i = 0; i < psDisplay->numHwLayers-1; i++)
+	    	{
+	    		hwc_layer_1_t *psLayer = &psDisplay->hwLayers[i];
+	    		
+	    		if(psLayer->handle == NULL)
+	    		{
+	    		    forceSoftwareRendering = 1;
+	    		    break;
+	    		}
 
-    	for(i = 0; i < psDisplay->numHwLayers-1; i++)
-    	{
-    		hwc_layer_1_t *psLayer = &psDisplay->hwLayers[i];
-    		
-    		if(psLayer->handle == NULL)
-    		{
-    		    forceSoftwareRendering = 1;
-    		    break;
-    		}
-        }
-
-        if(disp == HWC_DISPLAY_EXTERNAL && (ctx->cur_3d_mode[disp] == DISPLAY_3D_LEFT_RIGHT_HDMI || ctx->cur_3d_mode[disp] == DISPLAY_3D_TOP_BOTTOM_HDMI))
-        {
-            ctx->use_fb[0] = 1;
-            forceSoftwareRendering = 1;
-        }
+				/*if(psLayer->blending == HWC_BLENDING_PREMULT)
+				{
+	    		    forceSoftwareRendering = 1;
+	    		    break;
+	    		}*/
+	        }
+		}
 
     	if (forceSoftwareRendering)
     	{
@@ -377,7 +358,8 @@ static int hwc_set(hwc_composer_device_1_t *dev,
     int ret = 0;
 	unsigned long arg[4]={0};
 	int releaseFenceFd;
-
+	size_t disp, i;
+	hwc_display_contents_1_t *psDisplay;
 	SUNXI_hwcdev_context_t *ctx = &gSunxiHwcDevice;
 
 	hwcdev_generate_private_data(ctx);
@@ -385,53 +367,49 @@ static int hwc_set(hwc_composer_device_1_t *dev,
     arg[0] = 0;
     arg[1] = (unsigned int)(ctx->pvPrivateData);
     releaseFenceFd = ioctl(ctx->disp_fp,DISP_CMD_HWC_COMMIT,(unsigned long)arg);
-    
-    for (size_t i=0 ; i<displays[0]->numHwLayers ; i++) 
-    {
-		 if(displays[0]->hwLayers[i].acquireFenceFd >= 0)
-    	{
 
-	    	//ALOGD("layerAcqrureFd[%d] = %d\n",i,displays[0]->hwLayers[i].acquireFenceFd);
-            close(displays[0]->hwLayers[i].acquireFenceFd);
-            displays[0]->hwLayers[i].acquireFenceFd = -1;
-		}
-		if((displays[0]->hwLayers[i].compositionType == HWC_OVERLAY) || ((displays[0]->hwLayers[i].compositionType == HWC_FRAMEBUFFER_TARGET)))
+	for(disp = 0; disp < numDisplays; disp++)
+	{
+		psDisplay = displays[disp];
+		if(!psDisplay)
 		{
-			
-			if(releaseFenceFd >= 0)
-			{
-				displays[0]->hwLayers[i].releaseFenceFd =dup(releaseFenceFd);
+			ALOGV("%s: display[%d] was unexpectedly NULL",
+    								__func__, disp);
+    		continue;
+		}
+		for(i=0 ; i<psDisplay->numHwLayers ; i++)
+		{
+			if(psDisplay->hwLayers[i].acquireFenceFd >= 0)
+	        {
+	            close(psDisplay->hwLayers[i].acquireFenceFd);
+	            psDisplay->hwLayers[i].acquireFenceFd = -1;
 			}
+			if((psDisplay->hwLayers[i].compositionType == HWC_OVERLAY) || ((psDisplay->hwLayers[i].compositionType == HWC_FRAMEBUFFER_TARGET)))
+			{
+				if(releaseFenceFd >= 0)
+				{
+					psDisplay->hwLayers[i].releaseFenceFd = dup(releaseFenceFd);
+				}
+				else
+				{
+					psDisplay->hwLayers[i].releaseFenceFd = -1;
+				}
+	        }
 			else
 			{
 
-				displays[0]->hwLayers[i].releaseFenceFd = -1;
+				psDisplay->hwLayers[i].releaseFenceFd = -1;
 			}
-			
-		}	
-		else
-		{
-
-			displays[0]->hwLayers[i].releaseFenceFd = -1;
 		}
-        
-    }
+		
+	}
+	
     if(releaseFenceFd >= 0)
     {
         close(releaseFenceFd);
 		releaseFenceFd = -1;
     }
-//FIX:need free the private data
-     hwcdev_free_private_data(ctx);
-
-	if(ctx->force_sgx[0] & HWC_FORCE_SGX_REASON_STILL0)
-   {
-	   ctx->force_sgx[0] &= (~HWC_FORCE_SGX_REASON_STILL0);
-   }
-   else if(ctx->force_sgx[0] & HWC_FORCE_SGX_REASON_STILL1)
-   {
-	   ctx->force_sgx[0] &= (~HWC_FORCE_SGX_REASON_STILL1);
-   }
+	hwcdev_free_private_data(ctx);
 
     return ret;
 }
@@ -465,7 +443,7 @@ static void hwc_register_procs(struct hwc_composer_device_1* dev,
 static int hwc_getDisplayConfigs(struct hwc_composer_device_1 *dev,
         int disp, uint32_t *configs, size_t *numConfigs)
 {
-    if(disp == HWC_DISPLAY_PRIMARY)
+    /*if(disp == HWC_DISPLAY_PRIMARY)
     {
         if (*numConfigs == 0)
             return 0;
@@ -479,9 +457,48 @@ static int hwc_getDisplayConfigs(struct hwc_composer_device_1 *dev,
             *numConfigs = 1;
             return 0;
         }
-    }
+    }*/
 
-    return -EINVAL;
+	int err = -EINVAL;
+	SUNXI_hwcdev_context_t *ctx = &gSunxiHwcDevice;
+
+	/* We only support output on the primary display right now.
+	 *
+	 * Silently returning non-zero allows SurfaceFlinger to
+	 * think non-primary displays are disconnected.
+	 */
+	if(disp == HWC_DISPLAY_PRIMARY)
+    {
+    	if(numConfigs)
+    		*numConfigs = 1;
+
+    	if(configs)
+    		configs[0] = 0;
+	}
+	else if(disp == HWC_DISPLAY_EXTERNAL)
+	{
+	    if(ctx->hdmi_hpd)
+	    {
+	    //ALOGD("hwc_getDisplayConfigs HWC_DISPLAY_EXTERNAL");
+        	if(numConfigs)
+        		*numConfigs = 1;
+
+        	if(configs)
+        		configs[0] = 0;
+    	}
+	    else
+	    {
+	        goto err_out;
+	    }
+	}
+    else
+    {
+        goto err_out;
+    }
+    
+	err = 0;
+err_out:
+	return err;
 }
 
 static int32_t hwc_attribute(struct hwc_composer_device_1 *pdev,
@@ -496,23 +513,17 @@ static int32_t hwc_attribute(struct hwc_composer_device_1 *pdev,
         return -1;
     }
 
-    if(info.pixclock){
+    refreshRate = 1000000000000LLU /
+        (
+         uint64_t( info.upper_margin + info.lower_margin + info.yres )
+         * ( info.left_margin  + info.right_margin + info.xres )
+         * info.pixclock
+        );
 
-	    refreshRate = 1000000000000LLU /
-		(
-		 uint64_t( info.upper_margin + info.lower_margin + info.yres )
-		 * ( info.left_margin  + info.right_margin + info.xres )
-		 * info.pixclock
-		);
-
-   }
-    else
-	{
-		ALOGW("invalid refresh rate, assuming 60 Hz");
-		refreshRate = 60;
-	}
-	//Out GPU is not fully with 63 fps, but the parameter claim it is fps, so hardcode it
-	refreshRate = 60;
+    if (refreshRate == 0) {
+        ALOGW("invalid refresh rate, assuming 60 Hz");
+        refreshRate = 60;
+    }
 
     if(info.width == 0)
     {
@@ -554,6 +565,33 @@ static int32_t hwc_attribute(struct hwc_composer_device_1 *pdev,
     }
 }
 
+static int32_t hwc_hdmi_attribute(struct hwc_composer_device_1 *pdev,
+        const uint32_t attribute)
+{
+	SUNXI_hwcdev_context_t *ctx = &gSunxiHwcDevice;
+	ALOGD("hwc_hdmi_attribute");
+	switch(attribute) {
+    case HWC_DISPLAY_VSYNC_PERIOD:
+        return 16666666;
+
+    case HWC_DISPLAY_WIDTH:
+        return ctx->display_width[1];//1280;
+
+    case HWC_DISPLAY_HEIGHT:    
+        return ctx->display_height[1];//720;
+
+    case HWC_DISPLAY_DPI_X:
+        return 160000;
+
+    case HWC_DISPLAY_DPI_Y:
+        return 160000;
+
+    default:
+        ALOGE("unknown display attribute %u", attribute);
+        return 0;
+    }
+}
+
 static int hwc_getDisplayAttributes(struct hwc_composer_device_1 *dev,
         int disp, uint32_t config, const uint32_t *attributes, int32_t *values)
 {
@@ -563,6 +601,10 @@ static int hwc_getDisplayAttributes(struct hwc_composer_device_1 *dev,
         {
             values[i] = hwc_attribute(dev, attributes[i]);
         }
+		else if(disp == HWC_DISPLAY_EXTERNAL)
+		{
+			values[i] = hwc_hdmi_attribute(dev, attributes[i]);
+		}
         else 
         {
             ALOGE("unknown display type %u", disp);
@@ -608,8 +650,6 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
     
     psHwcDevice->prepare         = hwc_prepare;
     psHwcDevice->set             = hwc_set;
-    psHwcDevice->setParameter    = hwc_setParameter;
-    psHwcDevice->getParameter    = hwc_getParameter;
     psHwcDevice->registerProcs   = hwc_register_procs;
     psHwcDevice->eventControl	= hwc_eventControl;
 	psHwcDevice->blank			= hwc_blank;

@@ -150,8 +150,7 @@ PRODUCT_COPY_FILES += \
 ##    camera.exDroid
 
 PRODUCT_PACKAGES += \
-    display.sun7i \
-    hwcomposer.exDroid
+    display.sun7i
 
 #USE PREBUILTS INSTEAD
 PRODUCT_COPY_FILES += \

@@ -19,6 +19,11 @@ static int _hwcdev_usage_sw_write(private_handle_t *psHandle)
 	return psHandle->usage & GRALLOC_USAGE_SW_WRITE_OFTEN;
 }
 
+static int _hwcdev_usage_protected(private_handle_t *psHandle)
+{
+	return psHandle->usage & GRALLOC_USAGE_PROTECTED;
+}
+
 
 static int _hwcdev_is_valid_format(int format)
 {
@@ -142,25 +147,17 @@ static int _hwcdev_region_merge(hwc_rect_t *rect_from, hwc_rect_t *rect1_to, int
 
 static int _hwcdev_fe_can_use(SUNXI_hwcdev_context_t *ctx, int fe_src_w, int fe_src_h, int fe_out_w, int fe_out_h)
 {
-	double fe_clk = 234000000;
-	int fe_pro_w=0;
-	int fe_pro_h=0;
-	int m = 5;
-	int n = 4;
+	float efficience = 0.8;
+	float fe_clk = 297000000;
 	
-	if(fe_src_w >= fe_out_w)
-		fe_pro_w = fe_src_w;
-	else
-		fe_pro_w = fe_out_w;
+	float scale_factor_w = fe_src_w/fe_out_w ;
+	float scale_factor_h = fe_src_h/fe_out_h ;
 	
-	if(fe_src_h >= fe_out_h)
-		fe_pro_h = fe_src_h;
-	else
-		fe_pro_h = fe_out_h;
-
-	double tmp = (fe_pro_w * fe_pro_h * 60)/(fe_out_w * fe_out_h) * (ctx->display_width[0] * ctx->display_height[0]);
-	double required_fe_clk = tmp * m/n;
-
+	float fe_pro_w = (scale_factor_w > 1)? fe_src_w : fe_out_w;
+	float fe_pro_h = (scale_factor_h > 1)? fe_src_h : fe_out_h;
+	
+	float required_fe_clk = (fe_pro_w * fe_pro_h)*(ctx->display_width[0] * ctx->display_height[0] * 60)/(fe_out_w * fe_out_h)/efficience;
+	
 	if(required_fe_clk > fe_clk) {
 		return 0;//cant
 	} else {
@@ -193,24 +190,26 @@ hwcdev_try_to_assign_pipe(SUNXI_hwcdev_context_t *ctx, SUNXI_hwcdev_pipe_t *psPi
 		    ALOGV("%s: SW buffer for FB_TARGET?? usage:0x%x", __func__, handle->usage);
 		}
 		//GLES mode when use soft write ??????
-		/*
 		if (_hwcdev_usage_sw_write((private_handle_t*)psLayer->handle))
 		{
 			ALOGV("SW write to GLES\n");
 			 return ASSIGN_FAILED;
 		}
-		*/
+		
 		//??????
-		/*
 		if(handle->iFormat == HAL_PIXEL_FORMAT_RGB_565)
 		{
 		    ALOGV("%s:sw usage but not rgb565 format", __func__);
 		    return ASSIGN_FAILED;
 		}
-		*/
 	
 	}
-		
+
+	if(_hwcdev_usage_protected((private_handle_t*)psLayer->handle) && (ctx->out_type[disp] == DISP_OUTPUT_TYPE_HDMI))
+	{
+	    return ASSIGN_FAILED;
+	}
+
 	if (psLayer->compositionType == HWC_BACKGROUND)
 	{
 		ALOGV("%s:type == HWC_BACKGROUND", __func__);
@@ -229,12 +228,10 @@ hwcdev_try_to_assign_pipe(SUNXI_hwcdev_context_t *ctx, SUNXI_hwcdev_pipe_t *psPi
 	        ALOGV("%s:type force_sgx:%x", __func__, ctx->force_sgx[disp]);
 	        return ASSIGN_FAILED;
 	    }
-		/*
 	    if(_hwcdev_is_premult(psLayer))
 	    {
 	        return ASSIGN_FAILED;
 	    }
-		*/
 
 	    
         if(!_hwcdev_is_valid_layer(psLayer))
@@ -412,6 +409,8 @@ static int _hwcdev_setup_layer(SUNXI_hwcdev_context_t *ctx, __disp_layer_info_t 
         layer_info->fb.pre_multiply = 1;
     }
 
+    layer_info->ck_enable = 0;
+	
     layer_info->fb.addr[0] = handle->paddr;
     ALOGV("fb.addr = 0x%x\n",layer_info->fb.addr[0]);
     layer_info->fb.size.width = handle->iStride;
@@ -426,7 +425,7 @@ static int _hwcdev_setup_layer(SUNXI_hwcdev_context_t *ctx, __disp_layer_info_t 
     layer_info->scn_win.y = layer->displayFrame.top + (ctx->display_height[disp] * (100 - ctx->display_persent[disp]) / ctx->display_persent[disp] / 2);
     layer_info->scn_win.width = layer->displayFrame.right - layer->displayFrame.left;
     layer_info->scn_win.height = layer->displayFrame.bottom - layer->displayFrame.top;
-
+	
     if(_hwcdev_is_scaled(layer) || handle->iFormat==HAL_PIXEL_FORMAT_YV12)
     {
         int cut_size_scn, cut_size_src;
@@ -518,8 +517,13 @@ static int _hwcdev_setup_layer(SUNXI_hwcdev_context_t *ctx, __disp_layer_info_t 
     }
     else
     {
+    	if(disp == 1)
+    	{
+    		layer_info->scn_win.x = 0;
+    	}
         layer_info->mode = DISP_LAYER_WORK_MODE_NORMAL;
     }
+
     layer_info->pipe = psPipe->pipeType;
     layer_info->prio = psPipe->assignedLayerZOrder;
 
@@ -626,13 +630,13 @@ SUNXI_hwcdev_context_t* hwcdev_create_device(void)
     ctx->disp_fp = open("/dev/disp", O_RDWR);
     if (ctx->disp_fp < 0)
     {
-        ALOGV( "Failed to open disp device, ret:%d, errno: %d\n", ctx->disp_fp, errno);
+        ALOGD( "Failed to open disp device, ret:%d, errno: %d\n", ctx->disp_fp, errno);
     }
     
     ctx->fb_fp[0] = open("/dev/graphics/fb0", O_RDWR);
     if (ctx->fb_fp[0] < 0)
     {
-        ALOGV( "Failed to open fb0 device, ret:%d, errno:%d\n", ctx->fb_fp[0], errno);
+        ALOGD( "Failed to open fb0 device, ret:%d, errno:%d\n", ctx->fb_fp[0], errno);
     }
     
 	arg[0] = 0;
@@ -651,7 +655,11 @@ SUNXI_hwcdev_context_t* hwcdev_create_device(void)
 	arg[1] = DISP_LAYER_WORK_MODE_NORMAL;
 	ioctl(ctx->disp_fp, DISP_CMD_LAYER_REQUEST, (unsigned long)arg);
 
-/*
+
+	arg[0] = 1;
+	arg[1] = DISP_LAYER_WORK_MODE_NORMAL;
+	ioctl(ctx->disp_fp, DISP_CMD_LAYER_REQUEST, (unsigned long)arg);
+	
 	arg[0] = 1;
 	arg[1] = DISP_LAYER_WORK_MODE_NORMAL;
 	ioctl(ctx->disp_fp, DISP_CMD_LAYER_REQUEST, (unsigned long)arg);
@@ -664,10 +672,6 @@ SUNXI_hwcdev_context_t* hwcdev_create_device(void)
 	arg[1] = DISP_LAYER_WORK_MODE_NORMAL;
 	ioctl(ctx->disp_fp, DISP_CMD_LAYER_REQUEST, (unsigned long)arg);
 
-	arg[0] = 1;
-	arg[1] = DISP_LAYER_WORK_MODE_NORMAL;
-	ioctl(ctx->disp_fp, DISP_CMD_LAYER_REQUEST, (unsigned long)arg);
-*/
     sw_fd = open("/sys/class/switch/hdmi/state", O_RDONLY);
     if (sw_fd) 
     {
@@ -679,7 +683,7 @@ SUNXI_hwcdev_context_t* hwcdev_create_device(void)
         }
     }
     
-    ctx->hint_hdmi_mode = 4;
+    ctx->hint_hdmi_mode = 255;//4;
 
     ctx->display_width[0] = ctx->app_width;
     ctx->display_height[0] = ctx->app_height;
@@ -693,9 +697,6 @@ SUNXI_hwcdev_context_t* hwcdev_create_device(void)
     ctx->out_type[1] = DISP_OUTPUT_TYPE_HDMI;
     ctx->out_mode[1] = hdmi_mode;
     ctx->display_persent[1] = 96;
-
-    ctx->cur_3d_mode[0] = DISPLAY_2D_ORIGINAL;
-    ctx->cur_3d_mode[1] = DISPLAY_2D_ORIGINAL;
 
     pthread_create(&ctx->sVsyncThread, NULL, VsyncThreadWrapper, ctx);
 

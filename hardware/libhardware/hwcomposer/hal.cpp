@@ -12,10 +12,9 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <utils/Timers.h>
 
 
-static tv_para_t g_tv_para[]=
+/*static tv_para_t g_tv_para[]=
 {
     {8, DISP_TV_MOD_NTSC,             720,    480},
     {8, DISP_TV_MOD_PAL,              720,    576},
@@ -46,6 +45,39 @@ static tv_para_t g_tv_para[]=
     {2, DISP_VGA_H1440_V900_RB,       1440,   900},
     {2, DISP_VGA_H1920_V1080,         1920,   1080},
     {2, DISP_VGA_H1280_V720,          1280,   720},
+};*/
+
+static tv_para_t g_tv_para[]=
+{
+    {8, DISP_TV_MOD_NTSC,             720,    480,    690,    450,    DISP_TV_MOD_NTSC},
+    {8, DISP_TV_MOD_PAL,              720,    576,    690,    546,    DISP_TV_MOD_PAL},
+    
+    {5, DISP_TV_MOD_480I,             720,    480,    690,    450,    DISP_TV_MOD_480I},
+    {5, DISP_TV_MOD_576I,             720,    576,    690,    546,    DISP_TV_MOD_576I},
+    {5, DISP_TV_MOD_480P,             720,    480,    690,    450,    DISP_TV_MOD_480P},
+    {5, DISP_TV_MOD_576P,             720,    576,    690,    546,    DISP_TV_MOD_576P},
+    {5, DISP_TV_MOD_720P_50HZ,        1280,   720,    1220,   690,    DISP_TV_MOD_720P_50HZ},
+    {5, DISP_TV_MOD_720P_60HZ,        1280,   720,    1220,   690,    DISP_TV_MOD_720P_60HZ},
+    {5, DISP_TV_MOD_1080I_50HZ,       1920,   1080,   1880,   1040,   DISP_TV_MOD_1080I_50HZ},
+    {5, DISP_TV_MOD_1080I_60HZ,       1920,   1080,   1880,   1040,   DISP_TV_MOD_1080I_60HZ},
+    {1, DISP_TV_MOD_1080P_24HZ,       1920,   1080,   1880,   1040,   DISP_TV_MOD_1080P_24HZ},
+    {5, DISP_TV_MOD_1080P_50HZ,       1920,   1080,   1880,   1040,   DISP_TV_MOD_1080P_50HZ},
+    {5, DISP_TV_MOD_1080P_60HZ,       1920,   1080,   1880,   1040,   DISP_TV_MOD_1080P_60HZ},
+    
+    {1, DISP_TV_MOD_1080P_24HZ_3D_FP, 1920,   1080,   1920,   1080,   DISP_TV_MOD_1080P_24HZ_3D_FP},
+    {1, DISP_TV_MOD_720P_50HZ_3D_FP,  1280,   720,    1280,   720,    DISP_TV_MOD_720P_50HZ_3D_FP},
+    {1, DISP_TV_MOD_720P_60HZ_3D_FP,  1280,   720,    1280,   720,    DISP_TV_MOD_720P_60HZ_3D_FP},
+    
+    {2, DISP_VGA_H1680_V1050,         1668,   1050,   1668,   1050,   DISP_VGA_H1680_V1050},
+    {2, DISP_VGA_H1440_V900,          1440,   900,    1440,   900,    DISP_VGA_H1440_V900},
+    {2, DISP_VGA_H1360_V768,          1360,   768,    1360,   768,    DISP_VGA_H1360_V768},
+    {2, DISP_VGA_H1280_V1024,         1280,   1024,   1280,   1024,   DISP_VGA_H1280_V1024},
+    {2, DISP_VGA_H1024_V768,          1024,   768,    1204,   768,    DISP_VGA_H1024_V768},
+    {2, DISP_VGA_H800_V600,           800,    600,    800,    600,    DISP_VGA_H800_V600},
+    {2, DISP_VGA_H640_V480,           640,    480,    640,    480,    DISP_VGA_H640_V480},
+    {2, DISP_VGA_H1440_V900_RB,       1440,   900,    1440,   900,    DISP_VGA_H1440_V900},
+    {2, DISP_VGA_H1920_V1080,         1920,   1080,   1920,   1080,   DISP_VGA_H1920_V1080},
+    {2, DISP_VGA_H1280_V720,          1280,   720,    1280,   720,    DISP_VGA_H1280_V720},
 };
 
 int  get_width_from_mode(int mode)
@@ -77,6 +109,37 @@ int  get_height_from_mode(int mode)
     
     return -1;
 }
+
+int  get_valid_width_from_mode(int mode)
+{
+    unsigned int i = 0;
+    
+    for(i=0; i<sizeof(g_tv_para)/sizeof(tv_para_t); i++)
+    {
+        if(g_tv_para[i].mode == mode)
+        {
+            return g_tv_para[i].valid_width;
+        }
+    }
+
+    return -1;
+}
+
+int  get_valid_height_from_mode(int mode)
+{
+    unsigned int i = 0;
+    
+    for(i=0; i<sizeof(g_tv_para)/sizeof(tv_para_t); i++)
+    {
+        if(g_tv_para[i].mode == mode)
+        {
+            return g_tv_para[i].valid_height;
+        }
+    }
+    
+    return -1;
+}
+
 
 __disp_tv_mode_t get_suitable_hdmi_mode(void)
 {
@@ -144,12 +207,15 @@ static int hwc_hdmi_switch(void)
         {
             __disp_tv_mode_t hdmi_mode;
             
-            hdmi_mode = get_suitable_hdmi_mode();
+			hdmi_mode = get_suitable_hdmi_mode();
 
             ctx->display_width[1] = get_width_from_mode(hdmi_mode);
             ctx->display_height[1] = get_height_from_mode(hdmi_mode);
             ctx->out_type[1] = DISP_OUTPUT_TYPE_HDMI;
             ctx->out_mode[1] = hdmi_mode;
+
+			ctx->hdmi_valid_width = get_valid_width_from_mode(hdmi_mode);
+			ctx->hdmi_valid_height = get_valid_height_from_mode(hdmi_mode);
             
             arg[0] = 1;
             arg[1] = hdmi_mode;
@@ -205,7 +271,7 @@ static int hwc_uevent(void)
 		close(hotplug_sock);
 		return -1;
 	}
-	ALOGD("=====111111111111=========\n");
+
 	while(1) 
 	{
 		char buf[4096*2] = {0};
@@ -219,7 +285,7 @@ static int hwc_uevent(void)
         err = poll(&fds, 1, 256);
 
 //TODO
-#if 1//ndef DEBUG
+#if 0//ndef DEBUG
         if(err == 0)
         {
             if(!ctx->force_sgx[0])
@@ -238,8 +304,8 @@ static int hwc_uevent(void)
         {
             hwc_hdmi_switch();
         }
-#if 1 
-        if(err > 0 && fds.events == POLLIN)
+
+        if(err > 0 && fds.revents == POLLIN)
         {
     		int count = recv(hotplug_sock, &buf, sizeof(buf),0);
     		if(count > 0)
@@ -319,23 +385,6 @@ static int hwc_uevent(void)
                 }
             }
         }
-#else
-	{
-                    uint64_t timestamp = 0;
-                    unsigned int display_id = -1;
-                
-                    if(!ctx->psHwcProcs || !ctx->psHwcProcs->vsync)
-                       return 0;
-		    timestamp = systemTime(CLOCK_MONOTONIC);
-                    ALOGD("#### display0 timestamp:%lld", timestamp);
-                    display_id = 0;
-                    if(display_id == 0)//only handle display 0 vsync event now
-                    {
-                        ctx->psHwcProcs->vsync(ctx->psHwcProcs, display_id, timestamp);
-                    }
-        }
-
-#endif
     }
 
 	return 0;

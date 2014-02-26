@@ -84,11 +84,12 @@ typedef struct
     int                 time_stamp;
     int                 show_black[2];
 
-    __display_3d_mode   cur_3d_mode[2];
     int                 hint_hdmi_mode;// 4:720p50, 5:720p60, 8:1080p24, 9:1080p50, 10:1080p60, 255:auto
 
     void*               pvPrivateData;
     unsigned int	    uiPrivateDataSize;
+	int					hdmi_valid_width;
+	int					hdmi_valid_height;
 }SUNXI_hwcdev_context_t;
 
 typedef struct 
@@ -97,6 +98,9 @@ typedef struct
     int mode;
     int width;
     int height;
+	int valid_width;
+    int valid_height;
+    int driver_mode;
 }tv_para_t;
 
 extern SUNXI_hwcdev_context_t gSunxiHwcDevice;
@@ -111,7 +115,6 @@ extern int  get_height_from_mode(int mode);
 extern void *VsyncThreadWrapper(void *priv);
 extern int hwcdev_generate_private_data(SUNXI_hwcdev_context_t *ctx);
 extern int hwcdev_free_private_data(SUNXI_hwcdev_context_t *ctx);
-extern int _hwc_device_set_3d_mode(int disp, __display_3d_mode mode);
 extern int _hwc_device_set_backlight_mode(int disp, int mode);
 extern  int _hwc_device_set_backlight_demomode(int disp, int mode);
 extern int _hwc_device_set_enhancemode(int disp, int mode);

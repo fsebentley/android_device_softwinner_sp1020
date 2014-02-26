@@ -28,7 +28,8 @@ LOCAL_SRC_FILES := hwc.cpp \
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libEGL \
-	libGLESv1_CM 
+	libGLESv1_CM \
+	liblog
 LOCAL_C_INCLUDES += $(TARGET_HARDWARE_INCLUDE)
 LOCAL_MODULE := hwcomposer.$(TARGET_BOARD_PLATFORM)
 LOCAL_CFLAGS:= -DLOG_TAG=\"hwcomposer\"
