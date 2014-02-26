@@ -27,6 +27,9 @@ on early-fs
     chown system system /sys/devices/platform/mali-utgard.0/aw_mali_freq/mali_vol
 
 on fs
+
+    mount_all /fstab.sp1020
+
 # try to mount /data
     wait /dev/block/data
     mount ext4 /dev/block/data /data wait noatime nosuid nodev barrier=0
