@@ -149,14 +149,18 @@ PRODUCT_COPY_FILES += \
 #    display.sun7i \
 ##    camera.exDroid
 
+PRODUCT_PACKAGES += \
+    display.sun7i
+
 #USE PREBUILTS INSTEAD
 PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/lib/libion.so:system/lib/libion.so \
     device/softwinner/sp1020/prebuilt/lib/libion_alloc.so:system/lib/libion_alloc.so \
-    device/softwinner/sp1020/prebuilt/lib/hw/display.sun7i.so:system/lib/hw/display.sun7i.so \
     device/softwinner/sp1020/prebuilt/lib/hw/sensors.exDroid.so:system/lib/hw/sensors.exDroid.so \
     device/softwinner/sp1020/prebuilt/lib/hw/gps.exDroid.so:system/lib/hw/gps.exDroid.so \
     device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so
+
+#    device/softwinner/sp1020/prebuilt/lib/hw/display.sun7i.so:system/lib/hw/display.sun7i.so \
 
 # WiFi Overrides
 PRODUCT_PROPERTY_OVERRIDES := \
