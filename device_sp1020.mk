@@ -158,15 +158,6 @@ PRODUCT_COPY_FILES += \
     device/softwinner/sp1020/prebuilt/lib/hw/gps.exDroid.so:system/lib/hw/gps.exDroid.so \
     device/softwinner/sp1020/prebuilt/lib/hw/lights.sun7i.so:system/lib/hw/lights.sun7i.so
 
-# Set custom values for dalvik
-PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.heapsize=384m \
-    dalvik.vm.heapstartsize=8m \
-    dalvik.vm.heapgrowthlimit=96m \
-    dalvik.vm.heaptargetutilization=0.75 \
-    dalvik.vm.heapminfree=2m \
-    dalvik.vm.heapmaxfree=8m
-
 # WiFi Overrides
 PRODUCT_PROPERTY_OVERRIDES := \
     ro.carrier=wifi-only \
@@ -174,9 +165,11 @@ PRODUCT_PROPERTY_OVERRIDES := \
     wifi.supplicant_scan_interval=15 \
     keyguard.no_require_sim=true
 
-PRODUCT_PROPERTY_DEFAULT_OVERRIDES += \
+# ADB Secure
+ADDITIONAL_DEFAULT_PROPERTIES := \
     ro.adb.secure=0 \
-    ro.secure=0
+    ro.secure=0 \
+    persist.sys.usb.config=mass_storage
 
 # DRM
 PRODUCT_PROPERTY_OVERRIDES += drm.service.enabled=true
